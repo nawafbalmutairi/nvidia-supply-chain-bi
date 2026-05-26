@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NVIDIA AI-GPU Supply Chain BI — Nawaf Almutairi · KV6011</title>
+<meta name="description" content="Power BI dashboard tracking six supply-chain KPIs for NVIDIA H100/H200 across EMEA and NA: 96.4% forecast accuracy, 42.3K backorders, 95.92% on-time delivery. SSM + Balanced Scorecard methodology.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#f5f1ea;
+  --bg-2:#ede7d8;
+  --ink:#0a0a0a;
+  --ink-2:#3a3a38;
+  --ink-3:#666460;
+  --mute:#94918a;
+  --line:#cdc6b7;
+  --line-2:#dad3c2;
+  --ember:#e64d2e;
+  --ember-d:#b53a1f;
+  --serif:'Newsreader',Georgia,serif;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'JetBrains Mono',Menlo,monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  background-image:radial-gradient(circle at 1px 1px,rgba(10,10,10,0.03) 1px,transparent 0);
+  background-size:40px 40px;
+}
+
+/* ═══ MONOGRAM (NA symbol) ═══ */
+.monogram{
+  display:inline-block;
+  width:36px;height:36px;
+  position:relative;flex-shrink:0;
+}
+.monogram svg{width:100%;height:100%;display:block;}
+.monogram.lg{width:64px;height:64px;}
+
+/* ═══ SIDE RAIL ═══ */
+.rail{
+  position:fixed;top:0;left:0;
+  width:48px;height:100vh;
+  border-right:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;
+  padding:24px 0;background:var(--bg);z-index:100;
+}
+.rail-mono{margin-top:6px;}
+.rail-mono svg{width:28px;height:28px;}
+.rail-vert{
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  font-family:var(--mono);font-size:10px;
+  color:var(--ink-2);letter-spacing:0.3em;text-transform:uppercase;
+  font-weight:500;
+}
+.rail-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--ember);
+  animation:rail-pulse 2s infinite;
+}
+@keyframes rail-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(230,77,46,0.5);}
+  50%{box-shadow:0 0 0 6px rgba(230,77,46,0);}
+}
+@media(max-width:780px){.rail{display:none;}}
+
+/* ═══ TOP NAV ═══ */
+.topnav{
+  position:sticky;top:0;z-index:80;
+  background:rgba(245,241,234,0.94);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+  padding:16px 56px 16px 80px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:11px;
+  color:var(--ink-2);letter-spacing:0.04em;
+}
+@media(max-width:780px){.topnav{padding:14px 22px;}}
+.tn-back{
+  color:var(--ink);text-decoration:none;font-weight:500;
+  display:flex;align-items:center;gap:8px;
+  transition:color 0.2s;
+}
+.tn-back:hover{color:var(--ember);}
+.tn-meta{
+  color:var(--mute);letter-spacing:0.08em;text-transform:uppercase;
+  font-size:10px;font-weight:500;
+}
+.tn-meta .ember{color:var(--ember);}
+
+/* ═══ MAIN LAYOUT ═══ */
+.wrap{
+  padding-left:48px;
+}
+@media(max-width:780px){.wrap{padding-left:0;}}
+
+main{
+  max-width:1080px;
+  margin:0 auto;
+  padding:80px 56px 120px;
+}
+@media(max-width:780px){main{padding:48px 22px 80px;}}
+
+/* ═══ TYPOGRAPHY ═══ */
+h1.diss-title{
+  font-family:var(--serif);
+  font-size:clamp(40px,5.8vw,76px);
+  line-height:1.04;letter-spacing:-0.032em;
+  font-weight:400;
+  color:var(--ink);
+  margin-bottom:28px;
+  font-variation-settings:"opsz" 72;
+}
+h1.diss-title .it{font-style:italic;color:var(--ember);}
+
+h2.section-h{
+  font-family:var(--serif);
+  font-size:clamp(28px,3.6vw,46px);
+  line-height:1.1;letter-spacing:-0.022em;
+  font-weight:400;color:var(--ink);
+  margin:80px 0 28px;
+  font-variation-settings:"opsz" 36;
+  position:relative;
+  padding-left:80px;
+}
+h2.section-h::before{
+  content:attr(data-n);
+  position:absolute;left:0;top:14px;
+  font-family:var(--mono);font-size:10px;
+  color:var(--ember);letter-spacing:0.12em;
+  font-weight:600;text-transform:uppercase;
+}
+h2.section-h .it{font-style:italic;color:var(--ember);}
+@media(max-width:780px){
+  h2.section-h{padding-left:0;}
+  h2.section-h::before{position:static;display:block;margin-bottom:8px;}
+}
+
+h3.sub-h{
+  font-family:var(--serif);
+  font-size:clamp(22px,2.6vw,30px);
+  line-height:1.18;letter-spacing:-0.014em;
+  font-weight:500;color:var(--ink);
+  margin:40px 0 18px;
+}
+h3.sub-h .it{font-style:italic;color:var(--ember);}
+
+h4.subsub-h{
+  font-family:var(--mono);
+  font-size:11px;color:var(--ember);
+  letter-spacing:0.14em;text-transform:uppercase;
+  font-weight:600;
+  margin:28px 0 12px;
+}
+
+p{
+  font-family:var(--serif);
+  font-size:17px;line-height:1.65;
+  color:var(--ink-2);
+  margin-bottom:18px;
+  max-width:760px;
+  font-variation-settings:"opsz" 16;
+}
+p strong{color:var(--ink);font-weight:600;}
+p em{color:var(--ember);font-style:italic;}
+
+ul.story-list{
+  list-style:none;
+  padding:0;margin:18px 0 24px;
+  max-width:760px;
+}
+ul.story-list li{
+  font-family:var(--serif);
+  font-size:16px;line-height:1.55;color:var(--ink-2);
+  padding:12px 0 12px 56px;
+  border-bottom:1px solid var(--line);
+  position:relative;
+}
+ul.story-list li::before{
+  content:attr(data-n);
+  position:absolute;left:0;top:14px;
+  font-family:var(--mono);font-size:10px;color:var(--ember);
+  font-weight:600;letter-spacing:0.06em;
+}
+ul.story-list li strong{color:var(--ink);font-weight:600;}
+ul.story-list li em{color:var(--ember);font-style:italic;}
+
+/* Inline references */
+.ref{
+  font-family:var(--sans);font-size:12px;
+  color:var(--mute);vertical-align:super;
+  text-decoration:none;
+}
+.ref:hover{color:var(--ember);}
+
+/* Abstract block */
+.abstract{
+  background:var(--bg-2);border:1px solid var(--line);
+  padding:36px 40px;margin:0 0 40px;
+  position:relative;
+}
+@media(max-width:780px){.abstract{padding:24px;}}
+.abstract::before{
+  content:'— ABSTRACT';
+  position:absolute;top:-1px;left:-1px;
+  background:var(--ember);color:var(--bg);
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.14em;font-weight:600;
+  padding:6px 14px;
+}
+.abstract p{
+  font-family:var(--serif);font-size:18px;
+  font-style:italic;line-height:1.62;
+  color:var(--ink);max-width:none;
+  margin-top:14px;margin-bottom:14px;
+  font-variation-settings:"opsz" 24;
+}
+.abstract p:last-child{margin-bottom:0;}
+.abstract p strong{font-style:normal;color:var(--ink);}
+
+/* ═══ HERO ═══ */
+.diss-hero{
+  margin-bottom:48px;
+}
+.diss-eyebrow{
+  font-family:var(--mono);font-size:11px;
+  color:var(--ember);letter-spacing:0.14em;
+  text-transform:uppercase;font-weight:600;
+  margin-bottom:24px;
+  display:flex;align-items:center;gap:14px;
+}
+.diss-eyebrow::before{
+  content:'';width:32px;height:1px;background:var(--ember);
+}
+.diss-meta-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  margin-top:32px;
+}
+@media(max-width:780px){.diss-meta-grid{grid-template-columns:1fr 1fr;}}
+.dm-cell{
+  background:var(--bg);
+  padding:22px 24px;
+}
+.dm-label{
+  font-family:var(--mono);font-size:9px;
+  color:var(--mute);letter-spacing:0.12em;
+  text-transform:uppercase;margin-bottom:8px;
+}
+.dm-value{
+  font-family:var(--serif);font-size:18px;
+  color:var(--ink);line-height:1.2;
+  font-weight:500;letter-spacing:-0.01em;
+}
+.dm-value .it{color:var(--ember);font-style:italic;}
+
+/* ═══ KEY METRICS BANNER ═══ */
+.keystats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  margin:40px 0;
+}
+@media(max-width:780px){.keystats{grid-template-columns:1fr 1fr;}}
+.ks-cell{
+  background:var(--bg-2);
+  padding:28px 24px;
+  text-align:left;
+}
+.ks-cell.winner{
+  background:rgba(230,77,46,0.07);
+  position:relative;
+}
+.ks-cell.winner::after{
+  content:'★';position:absolute;top:10px;right:14px;
+  color:var(--ember);font-size:12px;
+}
+.ks-label{
+  font-family:var(--mono);font-size:9px;
+  color:var(--mute);letter-spacing:0.12em;
+  text-transform:uppercase;margin-bottom:12px;
+}
+.ks-cell.winner .ks-label{color:var(--ember);}
+.ks-value{
+  font-family:var(--serif);font-size:48px;
+  color:var(--ink);line-height:1;letter-spacing:-0.028em;
+  font-weight:400;
+  font-variation-settings:"opsz" 72;
+}
+.ks-cell.winner .ks-value{
+  color:var(--ember);font-style:italic;
+}
+.ks-value .small{font-size:0.45em;color:var(--mute);font-weight:400;letter-spacing:0;font-style:normal;margin-left:2px;}
+.ks-sub{
+  font-family:var(--sans);font-size:11px;
+  color:var(--ink-3);margin-top:10px;line-height:1.4;
+}
+
+/* ═══ FIGURES ═══ */
+.fig-block{
+  margin:40px 0 56px;
+}
+.fig-frame{
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  padding:1px;
+}
+.fig-cap{
+  display:flex;justify-content:space-between;
+  margin-top:14px;
+  font-family:var(--mono);font-size:10px;
+  color:var(--ink-3);letter-spacing:0.06em;
+  text-transform:uppercase;gap:14px;flex-wrap:wrap;
+}
+.fig-cap .label{color:var(--ember);font-weight:600;}
+.fig-cap .title{
+  font-family:var(--serif);font-style:italic;
+  font-size:13px;color:var(--ink-2);
+  text-transform:none;letter-spacing:0;
+  flex:1;text-align:right;line-height:1.4;
+}
+
+/* ═══ PIPELINE FLOW ═══ */
+.pipeline-viz{
+  background:var(--bg);padding:32px 28px;
+}
+.pipe-header{margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+.pipe-title{
+  font-family:var(--mono);font-size:10px;color:var(--ember);
+  letter-spacing:0.12em;text-transform:uppercase;font-weight:600;margin-bottom:6px;
+}
+.pipe-sub{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink-3);line-height:1.4;}
+.pipe-flow{
+  display:grid;gap:28px 22px;align-items:stretch;
+}
+.pipe-flow.six{grid-template-columns:repeat(6,1fr);}
+.pipe-flow.five{grid-template-columns:repeat(5,1fr);}
+.pipe-flow.four{grid-template-columns:repeat(4,1fr);}
+.pl-step{
+  background:var(--bg-2);border:1px solid var(--line);
+  padding:14px 12px;
+  display:flex;flex-direction:column;gap:8px;
+  position:relative;min-height:140px;
+}
+.pl-step.danger{border-color:#b07260;background:rgba(176,114,96,0.06);}
+.pl-step.winner{border-color:var(--ember);background:rgba(230,77,46,0.05);}
+.pl-step-n{font-family:var(--mono);font-size:9px;color:var(--mute);letter-spacing:0.12em;font-weight:600;}
+.pl-step.danger .pl-step-n{color:#925248;}
+.pl-step.winner .pl-step-n{color:var(--ember);}
+.pl-step-name{font-family:var(--serif);font-size:16px;color:var(--ink);font-weight:500;letter-spacing:-0.012em;line-height:1.1;}
+.pl-step.winner .pl-step-name{color:var(--ember);font-style:italic;}
+.pl-step-detail{font-family:var(--sans);font-size:11px;color:var(--ink-3);line-height:1.45;flex:1;}
+.pl-step-status{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.04em;color:var(--mute);}
+.pl-step.danger .pl-step-status{color:#925248;}
+.pl-step.winner .pl-step-status{color:var(--ember);}
+.pl-step:not(:last-child)::after{
+  content:'→';position:absolute;right:-16px;top:50%;
+  transform:translateY(-50%);
+  color:var(--ember);font-family:var(--serif);font-size:15px;line-height:1;font-weight:400;
+}
+@media(max-width:780px){
+  .pipe-flow.six,.pipe-flow.five,.pipe-flow.four{grid-template-columns:1fr;}
+  .pl-step{min-height:auto;}
+  .pl-step:not(:last-child)::after{content:'↓';right:auto;left:50%;top:auto;bottom:-20px;transform:translateX(-50%);font-size:16px;}
+}
+
+/* ═══ R² HEATMAP ═══ */
+.r2-heatmap{background:var(--bg);padding:24px;}
+.r2h-head{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+.r2h-title{font-family:var(--mono);font-size:10px;color:var(--ember);letter-spacing:0.12em;text-transform:uppercase;font-weight:600;margin-bottom:6px;}
+.r2h-sub{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink-3);line-height:1.4;}
+.r2h-grid{display:grid;grid-template-columns:auto repeat(4,1fr);gap:3px;}
+.r2h-cell{padding:14px 6px;text-align:center;font-family:var(--mono);font-size:12px;display:flex;align-items:center;justify-content:center;min-height:44px;position:relative;}
+.r2h-corner{background:transparent;}
+.r2h-col-h{background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:12px 6px;}
+.r2h-row-h{background:var(--ink);color:var(--bg);font-family:var(--sans);font-size:12px;font-weight:600;text-align:left;padding:0 14px;justify-content:flex-start;letter-spacing:-0.005em;}
+.r2h-val{font-weight:600;font-size:13px;}
+.r2h-val.v-neg-extreme{background:#8e3a32;color:#fff;}
+.r2h-val.v-neg-high{background:#b25a4f;color:#fff;}
+.r2h-val.v-neg-med{background:#d39288;color:var(--ink);}
+.r2h-val.v-neg-low{background:#e8c4be;color:var(--ink);}
+.r2h-val.v-pos-low{background:#c8d8c0;color:var(--ink);}
+.r2h-val.v-pos-med{background:#9bba8e;color:var(--ink);}
+.r2h-val.v-pos-high{background:#6f9961;color:#fff;}
+.r2h-val.winner{background:var(--ember);color:var(--bg);outline:3px solid var(--ember);outline-offset:-1px;z-index:1;}
+
+/* ═══ FULL METRICS TABLE ═══ */
+.metrics-table{
+  width:100%;
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-collapse:collapse;
+  font-family:var(--mono);font-size:12px;
+  margin:8px 0;
+}
+.metrics-table thead th{
+  background:var(--ink);color:var(--bg);
+  padding:12px 14px;
+  text-align:left;font-weight:600;
+  letter-spacing:0.06em;font-size:10px;
+  text-transform:uppercase;
+}
+.metrics-table thead th.num{text-align:right;}
+.metrics-table tbody td{
+  padding:11px 14px;
+  border-bottom:1px solid var(--line);
+  color:var(--ink-2);
+}
+.metrics-table tbody td.num{text-align:right;font-weight:500;}
+.metrics-table tbody tr.winner{background:rgba(230,77,46,0.07);}
+.metrics-table tbody tr.winner td{color:var(--ember);font-weight:600;}
+.metrics-table tbody tr.winner td:first-child::before{content:'★ ';color:var(--ember);}
+.metrics-table tbody tr:last-child td{border-bottom:none;}
+.metrics-table td.tag{
+  font-family:var(--sans);font-weight:500;color:var(--ink);
+}
+
+/* ═══ CODE BLOCKS ═══ */
+.code-block{
+  background:var(--ink);color:#d4cdb8;
+  padding:22px 26px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.6;
+  border:1px solid var(--ink);
+  margin:18px 0 28px;overflow-x:auto;
+}
+.code-block .kw{color:#e64d2e;}
+.code-block .str{color:#a8c4a0;}
+.code-block .num{color:#d4a86a;}
+.code-block .com{color:#7a7568;font-style:italic;}
+.code-block .fn{color:#d4cdb8;font-weight:600;}
+.code-caption{
+  font-family:var(--mono);font-size:10px;
+  color:var(--ink-3);letter-spacing:0.06em;
+  margin-bottom:8px;text-transform:uppercase;
+}
+.code-caption .label{color:var(--ember);font-weight:600;}
+
+/* ═══ CALLOUT BOX ═══ */
+.callout{
+  display:grid;grid-template-columns:auto 1fr;gap:18px;
+  padding:24px 28px;
+  background:rgba(230,77,46,0.04);
+  border:1px solid var(--ember);border-left-width:3px;
+  margin:32px 0;
+  align-items:center;
+}
+.callout-mark{
+  font-family:var(--serif);font-size:24px;
+  color:var(--ember);line-height:1;
+}
+.callout-text{
+  font-family:var(--serif);font-size:15.5px;
+  color:var(--ink-2);line-height:1.55;
+}
+.callout-text strong{color:var(--ink);font-weight:600;}
+.callout-text em{color:var(--ember);font-style:italic;}
+
+/* ═══ MODEL CARDS ═══ */
+.model-cards{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:14px;
+  margin:24px 0;
+}
+@media(max-width:780px){.model-cards{grid-template-columns:1fr;}}
+.mc-card{
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  padding:24px 26px;
+}
+.mc-card.winner{
+  border-color:var(--ember);
+  background:rgba(230,77,46,0.05);
+  position:relative;
+}
+.mc-card.winner::after{
+  content:'★ winner';position:absolute;top:14px;right:18px;
+  font-family:var(--mono);font-size:10px;color:var(--ember);
+  letter-spacing:0.08em;font-weight:600;
+}
+.mc-name{
+  font-family:var(--serif);font-size:24px;
+  color:var(--ink);font-weight:500;letter-spacing:-0.018em;
+  margin-bottom:6px;
+}
+.mc-card.winner .mc-name{color:var(--ember);font-style:italic;}
+.mc-type{
+  font-family:var(--mono);font-size:10px;color:var(--mute);
+  letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;
+}
+.mc-desc{
+  font-family:var(--serif);font-size:14px;
+  color:var(--ink-2);line-height:1.55;margin-bottom:14px;
+}
+.mc-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding-top:14px;border-top:1px solid var(--line);
+}
+.mc-stat-l{font-family:var(--mono);font-size:9px;color:var(--mute);letter-spacing:0.1em;text-transform:uppercase;}
+.mc-stat-v{font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:600;margin-top:3px;}
+.mc-card.winner .mc-stat-v{color:var(--ember);}
+
+/* ═══ BI DASHBOARD RECREATION ═══ */
+.cd-dashboard{
+  background:var(--bg);
+  padding:36px 40px;
+}
+@media(max-width:780px){.cd-dashboard{padding:24px;}}
+.cd-d-head{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding-bottom:24px;border-bottom:1px solid var(--line);
+  margin-bottom:32px;gap:24px;flex-wrap:wrap;
+}
+.cd-d-name{font-family:var(--mono);font-size:12px;color:var(--ink);letter-spacing:0.04em;font-weight:600;display:flex;align-items:center;gap:10px;}
+.cd-d-icon{color:var(--ember);font-size:13px;}
+.cd-d-sub{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink-3);margin-top:6px;}
+.cd-d-status{font-family:var(--mono);font-size:10px;color:var(--ember);letter-spacing:0.12em;font-weight:600;display:flex;align-items:center;gap:8px;text-transform:uppercase;}
+.cd-d-status .dot{width:7px;height:7px;border-radius:50%;background:var(--ember);animation:rail-pulse 2s infinite;}
+.cd-d-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:36px;}
+@media(max-width:600px){.cd-d-metrics{grid-template-columns:1fr;}}
+.cd-d-metric{padding:22px;background:var(--bg-2);border:1px solid var(--line);position:relative;}
+.cd-d-metric.winner{background:rgba(230,77,46,0.05);border-color:var(--ember);}
+.cd-d-metric.winner::after{content:'★';position:absolute;top:12px;right:14px;color:var(--ember);font-size:13px;}
+.cd-d-m-lbl{font-family:var(--mono);font-size:9px;color:var(--mute);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;}
+.cd-d-metric.winner .cd-d-m-lbl{color:var(--ember);}
+.cd-d-m-val{font-family:var(--serif);font-size:54px;line-height:1;letter-spacing:-0.035em;color:var(--ink);font-weight:400;}
+.cd-d-metric.winner .cd-d-m-val{font-style:italic;color:var(--ember);}
+.cd-d-m-unit{font-size:0.4em;color:var(--mute);font-weight:400;letter-spacing:0;font-style:normal;margin-left:2px;}
+.cd-d-section-h{font-family:var(--mono);font-size:10px;color:var(--ember);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:18px;font-weight:600;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.cd-d-section-h .sub{font-family:var(--serif);font-style:italic;text-transform:none;letter-spacing:0;color:var(--ink-3);font-size:13px;font-weight:400;}
+.cd-d-diverge{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+.cd-d-bar-row{display:grid;grid-template-columns:140px 1fr 70px;align-items:center;gap:14px;}
+@media(max-width:600px){.cd-d-bar-row{grid-template-columns:90px 1fr 60px;gap:8px;}}
+.cd-d-bar-name{font-family:var(--sans);font-size:13px;color:var(--ink-2);font-weight:500;text-align:right;}
+.cd-d-bar-row.winner .cd-d-bar-name{color:var(--ember);font-weight:600;}
+.cd-d-bar-row.winner .cd-d-bar-name::after{content:' ★';color:var(--ember);font-size:10px;}
+.cd-d-bar-track{position:relative;height:16px;background:var(--bg-2);border:1px solid var(--line);}
+.cd-d-bar-mid{position:absolute;left:50%;top:-5px;bottom:-5px;width:1px;background:var(--ink-2);transform:translateX(-50%);z-index:2;}
+.cd-d-bar-fill{position:absolute;top:0;bottom:0;width:0;transition:width 1.4s cubic-bezier(0.16,1,0.3,1);}
+.cd-d-bar-fill.pos{left:50%;background:#7a9d6e;}
+.cd-d-bar-fill.neg{right:50%;background:#b07260;}
+.cd-d-bar-row.winner .cd-d-bar-fill.pos{background:var(--ember);}
+.cd-d-bar-val{font-family:var(--mono);font-size:13px;font-weight:600;text-align:left;}
+.cd-d-bar-val.pos{color:#5a7d52;}
+.cd-d-bar-val.neg{color:#925248;}
+.cd-d-bar-row.winner .cd-d-bar-val.pos{color:var(--ember);}
+
+/* ═══ TIME SPLIT VISUALIZATION ═══ */
+.timesplit{
+  background:var(--bg-2);border:1px solid var(--line);
+  padding:24px;
+}
+.ts-label{font-family:var(--mono);font-size:10px;color:var(--ember);letter-spacing:0.12em;text-transform:uppercase;font-weight:600;margin-bottom:18px;}
+.ts-bar-container{
+  display:grid;grid-template-columns:70% 30%;
+  gap:2px;height:46px;margin:14px 0 18px;
+}
+.ts-train{
+  background:var(--ink);color:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+.ts-test{
+  background:var(--ember);color:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+.ts-axis{
+  display:flex;justify-content:space-between;
+  font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  font-weight:500;
+}
+.ts-axis-tick{position:relative;padding-top:8px;}
+.ts-axis-tick::before{content:'|';color:var(--line);position:absolute;top:-6px;left:50%;transform:translateX(-50%);}
+
+/* ═══ DISCUSSION SUB-BOX ═══ */
+.disc-box{
+  background:var(--bg-2);
+  border-left:3px solid var(--ember);
+  padding:20px 26px;
+  margin:24px 0;
+}
+.disc-box h4{
+  font-family:var(--mono);font-size:11px;
+  color:var(--ember);letter-spacing:0.14em;
+  text-transform:uppercase;font-weight:600;
+  margin-bottom:12px;
+}
+.disc-box p{margin-bottom:10px;font-size:15.5px;}
+.disc-box p:last-child{margin-bottom:0;}
+
+/* ═══ REFERENCES LIST ═══ */
+.refs{
+  margin-top:32px;
+}
+.refs ol{
+  list-style:none;counter-reset:refnum;padding:0;
+}
+.refs ol li{
+  counter-increment:refnum;
+  padding:14px 0 14px 48px;
+  position:relative;
+  border-bottom:1px solid var(--line);
+  font-family:var(--sans);font-size:13px;
+  color:var(--ink-2);line-height:1.55;
+  max-width:none;
+}
+.refs ol li::before{
+  content:'[' counter(refnum) ']';
+  position:absolute;left:0;top:14px;
+  font-family:var(--mono);font-size:11px;
+  color:var(--ember);font-weight:600;
+}
+.refs ol li em{color:var(--ink);font-style:italic;}
+.refs ol li a{color:var(--ember);text-decoration:none;word-break:break-all;}
+.refs ol li a:hover{text-decoration:underline;}
+
+/* ═══ TOC ═══ */
+.toc{
+  margin:32px 0 56px;
+  border:1px solid var(--line);
+  background:var(--bg-2);
+  padding:28px 32px;
+}
+.toc-h{
+  font-family:var(--mono);font-size:10px;
+  color:var(--ember);letter-spacing:0.14em;
+  text-transform:uppercase;font-weight:600;
+  margin-bottom:18px;
+}
+.toc ol{
+  list-style:none;padding:0;counter-reset:tocnum;
+  column-count:2;column-gap:40px;
+}
+@media(max-width:780px){.toc ol{column-count:1;}}
+.toc ol li{
+  counter-increment:tocnum;
+  padding:8px 0 8px 32px;
+  position:relative;
+  break-inside:avoid;
+}
+.toc ol li::before{
+  content:counter(tocnum,upper-roman) '.';
+  position:absolute;left:0;top:9px;
+  font-family:var(--mono);font-size:10px;
+  color:var(--ember);font-weight:600;letter-spacing:0.04em;
+}
+.toc ol li a{
+  font-family:var(--serif);font-size:15px;
+  color:var(--ink-2);text-decoration:none;
+  transition:color 0.2s;
+}
+.toc ol li a:hover{color:var(--ember);}
+
+/* ═══ FOOTER ═══ */
+.diss-footer{
+  margin-top:120px;
+  padding-top:48px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;
+  align-items:flex-end;gap:32px;flex-wrap:wrap;
+}
+.df-left{
+  font-family:var(--mono);font-size:10px;
+  color:var(--mute);letter-spacing:0.1em;
+  text-transform:uppercase;line-height:1.7;
+}
+.df-left .ember{color:var(--ember);}
+.df-back{
+  font-family:var(--mono);font-size:12px;
+  color:var(--ink);text-decoration:none;
+  letter-spacing:0.04em;font-weight:600;
+  border:1px solid var(--ink);
+  padding:14px 22px;
+  transition:all 0.2s;
+}
+.df-back:hover{background:var(--ink);color:var(--bg);}
+
+/* ═══ RESPONSIVE BACKDROP ═══ */
+::selection{background:var(--ember);color:var(--bg);}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute;">
+  <symbol id="na" viewBox="0 0 40 40">
+    <rect x="0.5" y="0.5" width="39" height="39" fill="none" stroke="#e64d2e" stroke-width="1"/>
+    <line x1="2" y1="20" x2="38" y2="20" stroke="#e64d2e" stroke-width="1"/>
+    <path d="M 8 17 L 8 4 L 11 4 L 21 14 L 21 4 L 24 4 L 24 17 L 21 17 L 11 7 L 11 17 Z" fill="#0a0a0a"/>
+    <path d="M 14 36 L 19 23 L 22 23 L 27 36 L 24 36 L 23 33 L 18 33 L 17 36 Z M 19 31 L 22 31 L 20.5 26 Z" fill="#e64d2e" font-style="italic"/>
+  </symbol>
+</svg>
+
+<aside class="rail" aria-label="Brand rail">
+  <a href="https://nawafbalmutairi.github.io/" class="rail-mono" aria-label="Home"><span class="monogram"><svg><use href="#na"/></svg></span></a>
+  <span class="rail-vert">NAWAF ALMUTAIRI · NVIDIA BI · KV6011</span>
+  <span class="rail-dot" aria-hidden="true"></span>
+</aside>
+<div class="wrap">
+<nav class="topnav">
+  <a href="https://nawafbalmutairi.github.io/" class="tn-back">← Back to portfolio</a>
+  <span class="tn-meta">KV6011 · <span class="ember">2025</span> · BI Project</span>
+</nav>
+
+<main>
+
+  <header class="diss-hero">
+    <div class="diss-eyebrow">Business Intelligence Project · KV6011 · Northumbria University</div>
+    <h1 class="diss-title">
+      NVIDIA AI-GPU Supply Chain<br>
+      <span class="it">Business Intelligence Dashboard.</span>
+    </h1>
+    <p style="font-size:18.5px;color:var(--ink-3);max-width:760px;">
+      A Power BI dashboard tracking <strong>six supply-chain KPIs</strong> for NVIDIA's H100 and H200 product lines across EMEA and North America — built on top of a <strong>Soft Systems Methodology</strong> analysis with causal-loop modelling, then aligned to a four-tier <em>Balanced Scorecard</em>.
+    </p>
+
+    <div class="diss-meta-grid">
+      <div class="dm-cell">
+        <div class="dm-label">Author</div>
+        <div class="dm-value">Nawaf Almutairi</div>
+      </div>
+      <div class="dm-cell">
+        <div class="dm-label">Module</div>
+        <div class="dm-value">KV6011<br><span style="font-size:12px;color:var(--mute);font-family:var(--mono);">Business Intelligence</span></div>
+      </div>
+      <div class="dm-cell">
+        <div class="dm-label">Tools</div>
+        <div class="dm-value">Power BI <span class="it">+ DAX</span></div>
+      </div>
+      <div class="dm-cell">
+        <div class="dm-label">Year</div>
+        <div class="dm-value">2025</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="abstract">
+    <p>
+      This project addresses a fundamental tension in modern semiconductor supply chains: <strong>generative-AI demand is explosive and volatile, while capacity is constrained by upstream foundry and packaging bottlenecks</strong>. NVIDIA's H100 and H200 platforms, central to AI training workloads, sit at the intersection of this pressure.
+    </p>
+    <p>
+      A six-KPI Power BI dashboard was built on top of monthly demand, inventory, and supplier-lead-time data spanning two products and two regions (EMEA, North America). The dashboard surfaces <strong>96.4% forecast accuracy</strong>, <strong>24.3% MAPE</strong>, <strong>42.3K total backorders</strong> against <strong>255.8K inventory units</strong>, <strong>57.0% capacity utilisation</strong>, a <strong>59-day average supplier lead time</strong>, and <strong>95.92% on-time delivery</strong>.
+    </p>
+    <p>
+      Underpinning the visualisations is a <em>Soft Systems Methodology</em> analysis — a rich picture of the ecosystem, a causal-loop diagram with four reinforcing/balancing feedback loops, and a Balanced Scorecard mapping each KPI to a strategic tier. The result is a dashboard that doesn't just report numbers — it explains <strong>why</strong> they move.
+    </p>
+  </div>
+
+  <div class="keystats">
+    <div class="ks-cell winner">
+      <div class="ks-label">Forecast accuracy</div>
+      <div class="ks-value">96.4<span class="small">%</span></div>
+      <div class="ks-sub">DAX-computed as 1 − MAPE</div>
+    </div>
+    <div class="ks-cell">
+      <div class="ks-label">On-time delivery</div>
+      <div class="ks-value">95.9<span class="small">%</span></div>
+      <div class="ks-sub">across both regions</div>
+    </div>
+    <div class="ks-cell">
+      <div class="ks-label">Total backorders</div>
+      <div class="ks-value">42.3<span class="small">K</span></div>
+      <div class="ks-sub">EMEA 21.1K · NA 21.1K</div>
+    </div>
+    <div class="ks-cell">
+      <div class="ks-label">Avg lead time</div>
+      <div class="ks-value">59<span class="small">days</span></div>
+      <div class="ks-sub">supplier-side</div>
+    </div>
+  </div>
+
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-h">— Contents</div>
+    <ol>
+      <li><a href="#introduction">Introduction</a></li>
+      <li><a href="#methodology">Methodology · SSM &amp; BSc</a></li>
+      <li><a href="#data">Data &amp; Model</a></li>
+      <li><a href="#dashboard">Dashboard &amp; KPIs</a></li>
+      <li><a href="#dax">DAX Measures</a></li>
+      <li><a href="#discussion">Discussion &amp; Insights</a></li>
+      <li><a href="#limitations">Limitations &amp; Future Work</a></li>
+      <li><a href="#conclusion">Conclusion</a></li>
+    </ol>
+  </nav>
+
+  <section id="introduction">
+    <h2 class="section-h" data-n="§ 01">Introduction.</h2>
+
+    <p>
+      The 2023–2025 generative-AI surge transformed NVIDIA from a graphics-chip company into the backbone of the global AI training economy. H100 and H200 became scarce strategic resources. But the visible scarcity — backorders, allocation politics, billion-dollar reservation queues — is the <em>symptom</em>, not the system. The system is the supply chain.
+    </p>
+
+    <p>
+      This project asks: <strong>can a single BI dashboard make the underlying supply-chain dynamics legible to a non-technical operator?</strong> Six KPIs, two product lines, two regions — surfaced in a way that explains not just <em>what</em> is happening, but <em>why</em>.
+    </p>
+
+    <h3 class="sub-h"><span class="it">Research questions.</span></h3>
+    <ul class="story-list">
+      <li data-n="RQ1">What are the right <strong>six headline KPIs</strong> for an AI-GPU supply chain at this scale?</li>
+      <li data-n="RQ2">How should these KPIs be <strong>connected to a strategic narrative</strong> — not just listed as numbers?</li>
+      <li data-n="RQ3">What <strong>feedback dynamics</strong> drive the observed patterns, and which loops are reinforcing vs balancing?</li>
+    </ul>
+  </section>
+
+  <section id="methodology">
+    <h2 class="section-h" data-n="§ 02">Methodology · SSM &amp; Balanced Scorecard.</h2>
+
+    <p>
+      The methodology has three layers stacked on top of each other: a <strong>rich picture</strong> of the ecosystem (who's involved and what flows between them), a <strong>causal-loop diagram</strong> showing how the feedback works, and a <strong>Balanced Scorecard</strong> mapping the KPIs to a strategic layer-cake. The dashboard sits on top of all three.
+    </p>
+
+    <h3 class="sub-h">Layer 1 — <span class="it">Rich Picture.</span></h3>
+    <p>
+      A rich picture is an SSM technique that maps an ecosystem informally — actors, flows, and pressures, all in a single visual. For NVIDIA's AI-GPU supply chain, the rich picture identifies:
+    </p>
+    <ul class="story-list">
+      <li data-n="Centre"><strong>NVIDIA Operations &amp; Planning</strong> — the actor whose decisions the dashboard supports.</li>
+      <li data-n="Upstream"><strong>TSMC</strong> (advanced foundry) and <strong>CoWoS</strong> (packaging) — capacity-constrained, hard to scale on a quarterly timeline.</li>
+      <li data-n="Downstream"><strong>Cloud hyperscalers</strong> (AWS, Azure, GCP), <strong>enterprise customers</strong>, <strong>OEMs</strong>, and <strong>logistics providers</strong>.</li>
+      <li data-n="Pressures"><strong>Competitors</strong>, <strong>geopolitics</strong> &amp; export controls, <strong>market expectations</strong> driven by quarterly cycles.</li>
+      <li data-n="Driver"><strong>Generative-AI demand</strong> — explosive, volatile, the root cause of everything else.</li>
+      <li data-n="Pain"><strong>Backorders / unserved demand</strong> — the visible failure mode that everything else feeds into.</li>
+    </ul>
+
+    <h3 class="sub-h">Layer 2 — <span class="it">Causal Loop Diagram.</span></h3>
+    <p>
+      Four feedback loops drive the observable behaviour of the system:
+    </p>
+    <ul class="story-list">
+      <li data-n="R1"><strong>Demand Surge (reinforcing).</strong> AI demand ↑ → backorders ↑ → customer pressure ↑ → production push ↑ → capacity strain ↑ → lead times ↑ → backorders ↑ (and the loop continues).</li>
+      <li data-n="R2"><strong>Forecast Volatility (reinforcing).</strong> Volatile orders → larger forecast errors → unstable inventory positions → more reactive ordering → further volatility.</li>
+      <li data-n="B1"><strong>Capacity Constraint (balancing).</strong> Production limits cap absolute throughput; eventually unmet demand forces forecast revision downward, stabilising the system.</li>
+      <li data-n="B2"><strong>Lead Time Adjustment (balancing).</strong> Long lead times → delayed shipments → planning teams add buffer → smoother future cycles.</li>
+    </ul>
+
+    <h3 class="sub-h">Layer 3 — <span class="it">Balanced Scorecard.</span></h3>
+    <p>
+      The Balanced Scorecard maps each KPI to one of four strategic tiers, so the dashboard reads as a <em>strategy artefact</em> rather than a list of metrics:
+    </p>
+    <ul class="story-list">
+      <li data-n="01"><strong>Learning &amp; Growth</strong> — capability foundation: BI &amp; data skills, forecasting expertise, systems thinking, tool fluency.</li>
+      <li data-n="02"><strong>Internal Processes</strong> — engine improvements: reduce forecast error (MAPE), tighten supply planning, resolve CoWoS bottlenecks, balance capacity.</li>
+      <li data-n="03"><strong>Customer</strong> — loyalty: shorter lead times, higher on-time delivery, fewer unserved orders, confidence in supply commitments.</li>
+      <li data-n="04"><strong>Financial</strong> — result: predictable revenue, lower cost of delays, minimised lost sales, stable margin profile.</li>
+    </ul>
+  </section>
+
+  <section id="data">
+    <h2 class="section-h" data-n="§ 03">Data &amp; Model.</h2>
+
+    <p>
+      The dashboard is powered by a star-schema data model with one fact table and three dimension tables. The fact table contains monthly demand observations — forecast and actual — joined to Product (H100 / H200) and Region (EMEA / NA) dimensions, plus a date dimension supporting time-intelligence DAX measures.
+    </p>
+
+    <h3 class="sub-h">Data <span class="it">scope.</span></h3>
+    <ul class="story-list">
+      <li data-n="01"><strong>Time span:</strong> 12 months of monthly observations.</li>
+      <li data-n="02"><strong>Products:</strong> 2 (H100, H200).</li>
+      <li data-n="03"><strong>Regions:</strong> 2 (EMEA, North America).</li>
+      <li data-n="04"><strong>Tables:</strong> Demand fact + Product / Region / Date dimensions.</li>
+      <li data-n="05"><strong>Inventory / backorder snapshots:</strong> point-in-time, by region.</li>
+    </ul>
+
+    <div class="callout">
+      <div class="callout-mark">i</div>
+      <div class="callout-text">
+        <strong>The data is synthetic / illustrative.</strong> NVIDIA does not publish operational supply-chain data at this granularity. The values used are designed to represent <em>plausible</em> AI-GPU supply-chain dynamics so the methodology and visualisations are evaluable on their own terms.
+      </div>
+    </div>
+  </section>
+
+  <section id="dashboard">
+    <h2 class="section-h" data-n="§ 04">Dashboard &amp; KPIs.</h2>
+
+    <p>
+      The dashboard is a single-page Power BI artefact with six KPI cards across the top, three chart panels in the middle (lead time, forecast vs actual, inventory table), and a 12-month production-vs-demand bar chart along the bottom. Two slicers (Product, Region) cross-filter every visual.
+    </p>
+
+    <h3 class="sub-h">The six <span class="it">headline KPIs.</span></h3>
+
+    <table class="metrics-table">
+      <thead>
+        <tr><th>KPI</th><th class="num">Value</th><th>What it tells the operator</th></tr>
+      </thead>
+      <tbody>
+        <tr class="winner"><td>Forecast Accuracy</td><td class="num">96.4%</td><td>How closely predicted demand matches actual orders shipped.</td></tr>
+        <tr><td>MAPE</td><td class="num">24.3%</td><td>Mean Absolute Percentage Error — the inverse view.</td></tr>
+        <tr><td>Total Backorders</td><td class="num">42.3K</td><td>Demand received but not immediately fulfilled.</td></tr>
+        <tr><td>Capacity Utilisation</td><td class="num">57.0%</td><td>Headroom remaining across production lines.</td></tr>
+        <tr><td>Avg Supplier Lead Time</td><td class="num">59 days</td><td>Average days from supplier order to receipt.</td></tr>
+        <tr><td>On-time Delivery Rate</td><td class="num">95.92%</td><td>Fulfilled orders that hit committed dates.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub-h">Inventory / backorder <span class="it">by region.</span></h3>
+
+    <table class="metrics-table">
+      <thead>
+        <tr><th>Region</th><th class="num">Inventory (units)</th><th class="num">Backorders</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>EMEA</td><td class="num">127,898</td><td class="num">21,137</td></tr>
+        <tr><td>North America</td><td class="num">127,898</td><td class="num">21,137</td></tr>
+        <tr><td><strong>Total</strong></td><td class="num"><strong>255,796</strong></td><td class="num"><strong>42,274</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:18px;">
+      The <strong>perfect even split</strong> across regions is structural — production allocation is balanced, but so is the under-fulfilment. That alone is a finding: the bottleneck is <em>upstream</em> of regional planning, not <em>within</em> it. Reallocating between EMEA and NA wouldn't help; the system needs more total supply.
+    </p>
+  </section>
+
+  <section id="dax">
+    <h2 class="section-h" data-n="§ 05">DAX Measures.</h2>
+
+    <p>
+      Eight DAX measures power the dashboard. The three most consequential:
+    </p>
+
+    <div class="code-caption"><span class="label">MEASURE 01</span> · Forecast Accuracy</div>
+    <div class="code-block">Forecast Accuracy =
+    1 - DIVIDE(
+        SUMX( Demand, ABS( Demand[Forecast] - Demand[Actual] ) ),
+        SUMX( Demand, Demand[Actual] )
+    )</div>
+
+    <div class="code-caption"><span class="label">MEASURE 02</span> · MAPE (Mean Absolute Percentage Error)</div>
+    <div class="code-block">MAPE =
+    AVERAGEX(
+        Demand,
+        DIVIDE(
+            ABS( Demand[Forecast] - Demand[Actual] ),
+            Demand[Actual]
+        )
+    )</div>
+
+    <div class="code-caption"><span class="label">MEASURE 03</span> · 3-Month Moving Average of Actual Demand</div>
+    <div class="code-block">3M Moving Avg Demand =
+    CALCULATE(
+        AVERAGE( Demand[Actual] ),
+        DATESINPERIOD(
+            Demand[MonthEnd],
+            LASTDATE( Demand[MonthEnd] ),
+            -3,
+            MONTH
+        )
+    )</div>
+
+    <p>
+      The 3-month moving average is overlaid on the forecast-vs-actual line chart. It smooths short-term noise so the underlying demand <em>trend</em> is legible, separately from month-to-month variance.
+    </p>
+  </section>
+
+  <section id="discussion">
+    <h2 class="section-h" data-n="§ 06">Discussion &amp; Insights.</h2>
+
+    <h3 class="sub-h">The <span class="it">May/November pattern.</span></h3>
+    <p>
+      The 3-month moving-average overlay revealed a recurring <strong>May/November under-shoot</strong>: forecasts consistently overstated actuals in those two months. The most plausible explanation is enterprise budget calendars — large customers defer orders ahead of fiscal-year-end (May for many UK/EU FYs, November for US calendar year-end deferrals to next-year capex). The recommendation: add a categorical <em>fiscal-quarter-end</em> feature to the forecast model.
+    </p>
+
+    <div class="disc-box">
+      <h4>Why 57% capacity utilisation is suspicious</h4>
+      <p>
+        A 57.0% utilisation alongside 42.3K backorders and 95.92% on-time delivery should not coexist. If capacity were really at 57%, the dashboard would show <em>excess</em> capacity sitting idle while backorders accumulate — which is a contradiction.
+      </p>
+      <p>
+        The likely explanation: <strong>capacity utilisation is mismeasured</strong>. The metric is probably reporting NVIDIA's own assembly capacity, not the bottleneck — which is <em>upstream CoWoS packaging</em>. CoWoS likely runs at 95%+, and the dashboard's capacity metric is misleading the operator about where the constraint lives.
+      </p>
+    </div>
+
+    <h3 class="sub-h">What the <span class="it">causal loops predict.</span></h3>
+    <p>
+      The reinforcing loops (R1, R2) explain why the situation feels unstable: demand and backorders amplify each other until a balancing loop kicks in. The balancing loops (B1, B2) are slow — capacity expansion takes <em>years</em>, not quarters. So in the short term, R1 and R2 dominate, and the system stays under stress. The dashboard makes this story visible.
+    </p>
+  </section>
+
+  <section id="limitations">
+    <h2 class="section-h" data-n="§ 07">Limitations &amp; Future Work.</h2>
+
+    <ul class="story-list">
+      <li data-n="01"><strong>Synthetic data.</strong> Without access to real NVIDIA operational data, the absolute values are illustrative. The methodology, however, transfers directly.</li>
+      <li data-n="02"><strong>12-month window.</strong> A multi-year window would surface yearly seasonality and competitive-launch effects (e.g. AMD MI300X, Intel Gaudi).</li>
+      <li data-n="03"><strong>Static visuals.</strong> A real-time refresh (Power BI Service + DirectQuery) would enable operational use; the current artefact is a snapshot.</li>
+      <li data-n="04"><strong>No supplier dimension.</strong> Future iterations should add CoWoS, HBM3 memory, and substrate suppliers as separate dimensions to localise the bottleneck inside the dashboard itself.</li>
+    </ul>
+  </section>
+
+  <section id="conclusion">
+    <h2 class="section-h" data-n="§ 08">Conclusion.</h2>
+
+    <p>
+      The dashboard answers RQ1 (six headline KPIs) by surfacing forecast accuracy, MAPE, backorders, capacity utilisation, lead time, and on-time delivery — each chosen because it corresponds to one Balanced Scorecard tier. It answers RQ2 (strategic narrative) by stacking the rich picture, causal loop diagram, and Balanced Scorecard underneath the KPIs, so every metric on the dashboard maps back to a <em>why</em>. And it answers RQ3 (feedback dynamics) by identifying two reinforcing loops driving instability and two balancing loops moving too slowly to compensate in the short term.
+    </p>
+
+    <p>
+      The headline finding is the <strong>even split of backorders across EMEA and NA</strong> — the bottleneck is structural and upstream, not regional. The recommendation is therefore not <em>better allocation</em> but <em>more total supply</em>, which requires investment in CoWoS packaging capacity. That single insight, derived from a dashboard plus a causal-loop diagram, is worth more than any single KPI on its own.
+    </p>
+  </section>
+
+
+  <footer class="diss-footer">
+    <div class="df-left">
+      Nawaf Almutairi · <span class="ember">KV6011</span><br>
+      Northumbria University · Newcastle upon Tyne<br>
+      Submitted 2025
+    </div>
+    <a href="https://nawafbalmutairi.github.io/" class="df-back">← Back to portfolio</a>
+  </footer>
+
+</main>
+</div>
+
+<script>
+var divergeObs=new IntersectionObserver(function(e){
+  e.forEach(function(en){if(en.isIntersecting){
+    en.target.querySelectorAll('.cd-d-bar-fill').forEach(function(b,i){
+      setTimeout(function(){b.style.width=b.dataset.w+'%';},i*150);
+    });
+    divergeObs.unobserve(en.target);
+  }});
+},{threshold:0.25});
+document.querySelectorAll('.cd-d-diverge').forEach(function(g){divergeObs.observe(g);});
+</script>
+
+</body>
+</html>
