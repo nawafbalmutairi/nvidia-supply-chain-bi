@@ -735,6 +735,11 @@ ul.story-list li em{color:var(--ember);font-style:italic;}
 .home-link:hover .hl-back{color:var(--ember)}
 body{padding-top:46px}
 :focus-visible{outline:2px solid #38bdf8;outline-offset:3px}
+
+/* Screenshots reuse the page's existing figure component; only the image
+   itself needs sizing. Light captures sit framed on the surface card, so a
+   Power BI screenshot reads as a document rather than a glare panel. */
+.fig-frame img{display:block;width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -881,7 +886,14 @@ body{padding-top:46px}
       <li data-n="Pain"><strong>Backorders / unserved demand</strong> — the visible failure mode that everything else feeds into.</li>
     </ul>
 
-    <h3 class="sub-h">Layer 2 — <span class="it">Causal Loop Diagram.</span></h3>
+    
+      <div class="fig-block">
+        <div class="fig-frame">
+          <img src="assets/rich-picture.png" width="1009" height="456" alt="Soft Systems Methodology rich picture with NVIDIA AI-GPU Operations and Planning at the centre, connected to TSMC foundry and CoWoS packaging suppliers, cloud and enterprise customers, logistics providers, regional warehouses, backorders, competitors, geopolitical export controls and market expectations." loading="lazy" decoding="async">
+        </div>
+        <div class="fig-cap"><span>Fig. 01 — Rich picture. NVIDIA Ops & Planning at the centre; constrained supply to the right, demand and delivery to the left, external pressures around the edge.</span><span>SSM · rich picture</span></div>
+      </div>
+<h3 class="sub-h">Layer 2 — <span class="it">Causal Loop Diagram.</span></h3>
     <p>
       Four feedback loops drive the observable behaviour of the system:
     </p>
@@ -892,7 +904,14 @@ body{padding-top:46px}
       <li data-n="B2"><strong>Lead Time Adjustment (balancing).</strong> Long lead times → delayed shipments → planning teams add buffer → smoother future cycles.</li>
     </ul>
 
-    <h3 class="sub-h">Layer 3 — <span class="it">Balanced Scorecard.</span></h3>
+    
+      <div class="fig-block">
+        <div class="fig-frame">
+          <img src="assets/causal-loop.png" width="1280" height="720" alt="Causal loop diagram with six variables — AI-GPU demand, backorders, customer pressure, production push, capacity strain and lead times — joined by arrows annotated plus or minus." loading="lazy" decoding="async">
+        </div>
+        <div class="fig-cap"><span>Fig. 02 — Causal loop diagram. Demand → backorders → customer pressure → production push → capacity strain → lead times → more backorders.</span><span>Six variables · R and B loops</span></div>
+      </div>
+<h3 class="sub-h">Layer 3 — <span class="it">Balanced Scorecard.</span></h3>
     <p>
       The Balanced Scorecard maps each KPI to one of four strategic tiers, so the dashboard reads as a <em>strategy artefact</em> rather than a list of metrics:
     </p>
@@ -905,7 +924,14 @@ body{padding-top:46px}
   </section>
 
   <section id="data">
-    <h2 class="section-h" data-n="§ 03">Data &amp; Model.</h2>
+    
+      <div class="fig-block">
+        <div class="fig-frame">
+          <img src="assets/strategy-map.png" width="1280" height="720" alt="Balanced Scorecard strategy map with four linked panels running left to right: Learning and Growth, Internal Processes, Customer, and Financial, each listing three or four objectives." loading="lazy" decoding="async">
+        </div>
+        <div class="fig-cap"><span>Fig. 03 — Strategy map. Capabilities build through internal processes to customer outcomes, ending in financial result.</span><span>Balanced Scorecard</span></div>
+      </div>
+<h2 class="section-h" data-n="§ 03">Data &amp; Model.</h2>
 
     <p>
       The dashboard is powered by a star-schema data model with one fact table and three dimension tables. The fact table contains monthly demand observations — forecast and actual — joined to Product (H100 / H200) and Region (EMEA / NA) dimensions, plus a date dimension supporting time-intelligence DAX measures.
@@ -970,7 +996,14 @@ body{padding-top:46px}
   </section>
 
   <section id="dax">
-    <h2 class="section-h" data-n="§ 05">DAX Measures.</h2>
+    
+      <div class="fig-block">
+        <div class="fig-frame">
+          <img src="assets/dashboard.png" width="1482" height="834" alt="NVIDIA supply chain Power BI dashboard with product and region slicers, six KPI cards reading 96.4 percent forecast accuracy, 24.3 percent MAPE, 42.3 thousand total backorders, 57.0 percent capacity utilisation, 59 days average lead time and 95.92 percent on-time delivery, with charts for supplier lead time by product, forecast versus actual demand with a three-month moving average, inventory and backorders by region, backorders over time, and production output versus actual demand." loading="lazy" decoding="async">
+        </div>
+        <div class="fig-cap"><span>Fig. 04 — NVIDIA_Supply_Chain.pbix. Six KPIs across H100 / H200 and EMEA / NA; 96.4% forecast accuracy, with EMEA and NA each carrying 21,137 backorders.</span><span>Power BI · .pbix</span></div>
+      </div>
+<h2 class="section-h" data-n="§ 05">DAX Measures.</h2>
 
     <p>
       Eight DAX measures power the dashboard. The three most consequential:
